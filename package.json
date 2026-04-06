@@ -1,0 +1,21 @@
+{
+  "name": "budget",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,client,electron -c blue,green,cyan \"npm run dev -w apps/server\" \"npm run dev -w apps/client\" \"npm run dev -w apps/electron\"",
+    "build": "npm run build -w packages/shared && npm run build -w apps/server && npm run build -w apps/client && npm run build -w apps/electron",
+    "test": "npm run test --workspaces --if-present", 
+    "dev:server": "npm run dev --workspace=apps/server",
+    "dev:client": "npm run dev --workspace=apps/client",
+    "dev:electron": "npm run dev --workspace=apps/electron"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.4.5"
+  }
+}

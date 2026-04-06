@@ -27,6 +27,7 @@ After MVP:
 * Express (Node.js backend)
 * SQLite (better-sqlite3)
 * Electron (desktop wrapper) 
+* Python (for pdf parsing sub-process) 
 
 ## Architecture قواعد
 
