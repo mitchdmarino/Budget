@@ -1,8 +1,11 @@
 import express from 'express';
 import db from './db';
+import { migrate } from './migrate';
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
+
+migrate();
 
 app.use(express.json());
 
