@@ -21,3 +21,19 @@ export interface Account {
   name: string;
   type: string;
 }
+
+export interface CreateTransactionInput {
+  amount: number;
+  date: string;
+  description: string;
+  category_id?: number | null;
+  account_id: number;
+}
+
+export interface UpdateTransactionInput {
+  amount?: number;
+  date?: string;
+  description?: string;
+  category_id?: number | null;
+  account_id?: number;
+}
