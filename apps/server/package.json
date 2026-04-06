@@ -2,9 +2,9 @@
   "name": "@budget/server",
   "version": "1.0.0",
   "private": true,
-  "main": "src/index.ts",
+  "main": "src/server.ts",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "test": "node --experimental-vm-modules node_modules/.bin/jest"
   },
