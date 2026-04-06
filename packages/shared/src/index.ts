@@ -37,3 +37,23 @@ export interface UpdateTransactionInput {
   category_id?: number | null;
   account_id?: number;
 }
+
+export interface CreateCategoryInput {
+  name: string;
+  color: string;
+}
+
+export interface UpdateCategoryInput {
+  name?: string;
+  color?: string;
+}
+
+export interface CreateAccountInput {
+  name: string;
+  type: string;
+}
+
+export interface UpdateAccountInput {
+  name?: string;
+  type?: string;
+}
