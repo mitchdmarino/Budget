@@ -4,8 +4,9 @@
   "private": true,
   "main": "dist/main.js",
   "scripts": {
-    "dev": "tsc && electron dist/main.js",
-    "build": "tsc"
+    "dev": "tsc && electron .",
+    "build": "tsc",
+    "start": "NODE_ENV=production electron ."
   },
   "dependencies": {
     "electron": "^31.0.0"

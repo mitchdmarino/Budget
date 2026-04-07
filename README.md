@@ -35,43 +35,41 @@ packages/
 npm install
 ```
 
-**2. Build the shared package**
+**2. Start development mode**
 
 ```bash
-npm run build -w packages/shared
+npm run dev
 ```
 
-**3. Start the dev server**
+This starts Express (port 3001), Vite (port 5173), and Electron concurrently. Electron loads the Vite dev server so hot-reload works normally.
+
+You can also run each piece individually:
 
 ```bash
-# Run server + client + electron concurrently
-npm run dev
-
-# Or run individually
 npm run dev:server    # Express API on http://localhost:3001
 npm run dev:client    # Vite dev server on http://localhost:5173
-npm run dev:electron  # Electron (load Vite dev server)
+npm run dev:electron  # Electron window (requires server + client running first)
 ```
 
-> **Note:** Start `dev:server` and `dev:client` before `dev:electron` — Electron loads the Vite dev server on startup.
-
 ## API Endpoints
+
+All routes are prefixed with `/api`.
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/health` | Server health + SQLite version |
-| GET | `/accounts` | List all accounts |
-| POST | `/accounts` | Create an account |
-| PUT | `/accounts/:id` | Update an account |
-| DELETE | `/accounts/:id` | Delete an account |
-| GET | `/categories` | List all categories |
-| POST | `/categories` | Create a category |
-| PUT | `/categories/:id` | Update a category |
-| DELETE | `/categories/:id` | Delete a category |
-| GET | `/transactions` | List all transactions |
-| POST | `/transactions` | Create a transaction |
-| PUT | `/transactions/:id` | Update a transaction |
-| DELETE | `/transactions/:id` | Delete a transaction |
+| GET | `/api/accounts` | List all accounts |
+| POST | `/api/accounts` | Create an account |
+| PUT | `/api/accounts/:id` | Update an account |
+| DELETE | `/api/accounts/:id` | Delete an account |
+| GET | `/api/categories` | List all categories |
+| POST | `/api/categories` | Create a category |
+| PUT | `/api/categories/:id` | Update a category |
+| DELETE | `/api/categories/:id` | Delete a category |
+| GET | `/api/transactions` | List all transactions |
+| POST | `/api/transactions` | Create a transaction |
+| PUT | `/api/transactions/:id` | Update a transaction |
+| DELETE | `/api/transactions/:id` | Delete a transaction |
 
 ## Database
 
@@ -85,6 +83,31 @@ DB_PATH=/path/to/your.db npm run dev:server
 
 ## Building for Production
 
+Build all packages in order (shared → server → client → electron):
+
 ```bash
 npm run build
+```
+
+Then launch the desktop app:
+
+```bash
+npm run start -w apps/electron
+```
+
+In production mode, Electron spawns the Express server automatically, waits for it to be ready, then opens the window. Express serves both the API and the built React frontend from `http://localhost:3001`. No separate dev servers are needed.
+
+## Testing
+
+Run all tests across workspaces:
+
+```bash
+npm test
+```
+
+Or target a specific workspace:
+
+```bash
+npm test -w apps/server   # server unit + integration tests
+npm test -w apps/client   # client component tests (vitest)
 ```
