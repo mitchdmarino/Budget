@@ -3,8 +3,8 @@ import type { Transaction, CreateTransactionInput } from '@budget/shared';
 
 const BASE = '/api/transactions';
 
-export async function fetchTransactions(): Promise<Transaction[]> {
-  const { data } = await axios.get<Transaction[]>(BASE);
+export async function fetchTransactions(month?: string): Promise<Transaction[]> {
+  const { data } = await axios.get<Transaction[]>(BASE, { params: month ? { month } : undefined });
   return data;
 }
 

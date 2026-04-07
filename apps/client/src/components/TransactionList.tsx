@@ -4,14 +4,19 @@ import { formatCents } from '../utils/format';
 interface Props {
   transactions: Transaction[];
   categories: Category[];
+  search: string;
   onDelete: (id: number) => void;
 }
 
-export default function TransactionList({ transactions, categories, onDelete }: Props) {
+export default function TransactionList({ transactions, categories, search, onDelete }: Props) {
   const categoryMap = Object.fromEntries(categories.map(c => [c.id, c]));
 
-  if (transactions.length === 0) {
-    return <p className="text-gray-500 text-sm">No transactions yet.</p>;
+  const visible = search.trim()
+    ? transactions.filter(t => t.description.toLowerCase().includes(search.toLowerCase()))
+    : transactions;
+
+  if (visible.length === 0) {
+    return <p className="text-gray-500 text-sm">{search ? 'No matching transactions.' : 'No transactions yet.'}</p>;
   }
 
   return (
@@ -27,7 +32,7 @@ export default function TransactionList({ transactions, categories, onDelete }: 
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-800">
-          {transactions.map((t) => {
+          {visible.map((t) => {
             const cat = t.category_id ? categoryMap[t.category_id] : null;
             const isExpense = t.amount_cents < 0;
             return (

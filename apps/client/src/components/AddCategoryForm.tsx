@@ -6,7 +6,7 @@ interface Props {
 }
 
 const PRESETS = ['#22c55e','#f97316','#a855f7','#3b82f6','#ef4444','#eab308','#14b8a6','#ec4899','#6366f1','#f43f5e'];
-const EMPTY = { name: '', color: PRESETS[0] };
+const EMPTY = { name: '', color: PRESETS[0], budget: '' };
 
 export default function AddCategoryForm({ onAdd }: Props) {
   const [fields, setFields] = useState(EMPTY);
@@ -18,7 +18,10 @@ export default function AddCategoryForm({ onAdd }: Props) {
     setError(null);
     setSubmitting(true);
     try {
-      await onAdd({ name: fields.name, color: fields.color });
+      const budget_cents = fields.budget
+        ? Math.round(parseFloat(fields.budget) * 100)
+        : null;
+      await onAdd({ name: fields.name, color: fields.color, budget_cents });
       setFields(EMPTY);
     } catch {
       setError('Failed to add category');
@@ -31,13 +34,27 @@ export default function AddCategoryForm({ onAdd }: Props) {
     <form onSubmit={handleSubmit} className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
       <h2 className="text-base font-semibold">Add Category</h2>
       {error && <p className="text-red-400 text-sm">{error}</p>}
-      <label className="flex flex-col gap-1 text-sm text-gray-400">
-        Name
-        <input
-          type="text" value={fields.name} onChange={e => setFields(f => ({ ...f, name: e.target.value }))} required
-          className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:border-indigo-500"
-        />
-      </label>
+
+      <div className="grid grid-cols-2 gap-3">
+        <label className="flex flex-col gap-1 text-sm text-gray-400">
+          Name
+          <input
+            type="text" value={fields.name}
+            onChange={e => setFields(f => ({ ...f, name: e.target.value }))} required
+            className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:border-indigo-500"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm text-gray-400">
+          Monthly Budget (optional)
+          <input
+            type="number" step="0.01" min="0" value={fields.budget}
+            onChange={e => setFields(f => ({ ...f, budget: e.target.value }))}
+            placeholder="0.00"
+            className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-gray-100 focus:outline-none focus:border-indigo-500"
+          />
+        </label>
+      </div>
+
       <div className="flex flex-col gap-2 text-sm text-gray-400">
         Color
         <div className="flex gap-2 flex-wrap">
@@ -55,6 +72,7 @@ export default function AddCategoryForm({ onAdd }: Props) {
           ))}
         </div>
       </div>
+
       <button type="submit" disabled={submitting}
         className="w-full py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-colors disabled:opacity-50">
         {submitting ? 'Adding…' : 'Add Category'}

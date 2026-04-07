@@ -14,6 +14,7 @@ export interface Category {
   id: number;
   name: string;
   color: string;
+  budget_cents: number | null;
 }
 
 export interface Account {
@@ -41,11 +42,13 @@ export interface UpdateTransactionInput {
 export interface CreateCategoryInput {
   name: string;
   color: string;
+  budget_cents?: number | null;
 }
 
 export interface UpdateCategoryInput {
   name?: string;
   color?: string;
+  budget_cents?: number | null;
 }
 
 export interface CreateAccountInput {

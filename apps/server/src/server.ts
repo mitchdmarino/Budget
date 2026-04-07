@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import db from './db';
 import { migrate } from './migrate';
+import { seedDefaultCategories } from './services/categoryService';
 import transactionRoutes from './routes/transactions';
 import accountRoutes from './routes/accounts';
 import categoryRoutes from './routes/categories';
@@ -11,6 +12,7 @@ const app = express();
 const PORT = process.env.PORT ?? 3001;
 
 migrate();
+seedDefaultCategories();
 
 app.use(express.json());
 

@@ -7,13 +7,28 @@ function applyCategory(description: string, categoryId: number): void {
   ).run(categoryId, description);
 }
 
-export function getTransactions(): Transaction[] {
+export function getTransactions(month?: string): Transaction[] {
+  if (month) {
+    return db
+      .prepare("SELECT * FROM transactions WHERE strftime('%Y-%m', date) = ? ORDER BY date DESC")
+      .all(month) as Transaction[];
+  }
   return db
     .prepare('SELECT * FROM transactions ORDER BY date DESC')
     .all() as Transaction[];
 }
 
 export function createTransaction(input: CreateTransactionInput): Transaction {
+  // Auto-categorize: if no category given, check if a prior transaction with the same
+  // description already has one and reuse it.
+  let resolvedCategoryId = input.category_id ?? null;
+  if (resolvedCategoryId == null) {
+    const match = db.prepare(
+      'SELECT category_id FROM transactions WHERE description = ? AND category_id IS NOT NULL LIMIT 1'
+    ).get(input.description) as { category_id: number } | undefined;
+    if (match) resolvedCategoryId = match.category_id;
+  }
+
   const { lastInsertRowid } = db.prepare(`
     INSERT INTO transactions (amount_cents, date, description, category_id, account_id)
     VALUES (?, ?, ?, ?, ?)
@@ -21,12 +36,12 @@ export function createTransaction(input: CreateTransactionInput): Transaction {
     input.amount_cents,
     input.date,
     input.description,
-    input.category_id ?? null,
+    resolvedCategoryId,
     input.account_id,
   );
 
-  if (input.category_id != null) {
-    applyCategory(input.description, input.category_id);
+  if (resolvedCategoryId != null) {
+    applyCategory(input.description, resolvedCategoryId);
   }
 
   return db

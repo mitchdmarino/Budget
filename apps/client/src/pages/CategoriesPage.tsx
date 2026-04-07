@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { Category, CreateCategoryInput } from '@budget/shared';
+import type { Category, CreateCategoryInput, UpdateCategoryInput } from '@budget/shared';
 import * as categoriesApi from '../api/categories';
 import CategoryList from '../components/CategoryList';
 import AddCategoryForm from '../components/AddCategoryForm';
@@ -19,6 +19,11 @@ export default function CategoriesPage() {
     setCategories(prev => [...prev, created]);
   }
 
+  async function handleUpdate(id: number, input: UpdateCategoryInput) {
+    const updated = await categoriesApi.updateCategory(id, input);
+    setCategories(prev => prev.map(c => c.id === id ? updated : c));
+  }
+
   async function handleDelete(id: number) {
     await categoriesApi.deleteCategory(id);
     setCategories(prev => prev.filter(c => c.id !== id));
@@ -29,7 +34,7 @@ export default function CategoriesPage() {
       <h1 className="text-2xl font-bold">Categories</h1>
       {error && <p className="text-red-400 text-sm">{error}</p>}
       <AddCategoryForm onAdd={handleAdd} />
-      <CategoryList categories={categories} onDelete={handleDelete} />
+      <CategoryList categories={categories} onUpdate={handleUpdate} onDelete={handleDelete} />
     </div>
   );
 }

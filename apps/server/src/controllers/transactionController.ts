@@ -19,9 +19,10 @@ const updateSchema = z.object({
   account_id: z.number().int().optional(),
 });
 
-export function getTransactions(_req: Request, res: Response, next: NextFunction): void {
+export function getTransactions(req: Request, res: Response, next: NextFunction): void {
   try {
-    res.json(transactionService.getTransactions());
+    const month = typeof req.query.month === 'string' ? req.query.month : undefined;
+    res.json(transactionService.getTransactions(month));
   } catch (err) {
     next(err);
   }
