@@ -15,10 +15,10 @@ export function getTransactions(): Transaction[] {
 
 export function createTransaction(input: CreateTransactionInput): Transaction {
   const { lastInsertRowid } = db.prepare(`
-    INSERT INTO transactions (amount, date, description, category_id, account_id)
+    INSERT INTO transactions (amount_cents, date, description, category_id, account_id)
     VALUES (?, ?, ?, ?, ?)
   `).run(
-    input.amount,
+    input.amount_cents,
     input.date,
     input.description,
     input.category_id ?? null,
@@ -47,10 +47,10 @@ export function updateTransaction(id: number, input: UpdateTransactionInput): Tr
 
   db.prepare(`
     UPDATE transactions
-    SET amount = ?, date = ?, description = ?, category_id = ?, account_id = ?
+    SET amount_cents = ?, date = ?, description = ?, category_id = ?, account_id = ?
     WHERE id = ?
   `).run(
-    input.amount ?? existing.amount,
+    input.amount_cents ?? existing.amount_cents,
     input.date ?? existing.date,
     description,
     newCategoryId,

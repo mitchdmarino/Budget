@@ -4,19 +4,19 @@ import * as transactionService from '../services/transactionService';
 import { AppError } from '../middleware/errorHandler';
 
 const createSchema = z.object({
-  amount: z.number(),
+  amount_cents: z.number().int(),
   date: z.string(),
   description: z.string().min(1),
-  category_id: z.number().nullable().optional(),
-  account_id: z.number(),
+  category_id: z.number().int().nullable().optional(),
+  account_id: z.number().int(),
 });
 
 const updateSchema = z.object({
-  amount: z.number().optional(),
+  amount_cents: z.number().int().optional(),
   date: z.string().optional(),
   description: z.string().min(1).optional(),
-  category_id: z.number().nullable().optional(),
-  account_id: z.number().optional(),
+  category_id: z.number().int().nullable().optional(),
+  account_id: z.number().int().optional(),
 });
 
 export function getTransactions(_req: Request, res: Response, next: NextFunction): void {

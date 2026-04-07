@@ -4,7 +4,7 @@ export interface Transaction {
   id: number;
   date: string;
   description: string;
-  amount: number;
+  amount_cents: number;
   category_id: number | null;
   account_id: number;
   created_at: string;
@@ -19,11 +19,11 @@ export interface Category {
 export interface Account {
   id: number;
   name: string;
-  type: string;
+  type: 'checking' | 'savings' | 'credit' | 'retirement';
 }
 
 export interface CreateTransactionInput {
-  amount: number;
+  amount_cents: number;
   date: string;
   description: string;
   category_id?: number | null;
@@ -31,7 +31,7 @@ export interface CreateTransactionInput {
 }
 
 export interface UpdateTransactionInput {
-  amount?: number;
+  amount_cents?: number;
   date?: string;
   description?: string;
   category_id?: number | null;
@@ -50,10 +50,11 @@ export interface UpdateCategoryInput {
 
 export interface CreateAccountInput {
   name: string;
-  type: string;
+  type: 'checking' | 'savings' | 'credit' | 'retirement';
 }
 
 export interface UpdateAccountInput {
   name?: string;
-  type?: string;
+  type?: 'checking' | 'savings' | 'credit' | 'retirement';
 }
+
