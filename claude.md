@@ -78,5 +78,5 @@ When generating code:
 
 ## Important
 
-Do not introduce new libraries unless explicitly requested.
+Do not introduce new libraries unless explicitly requested. If you think a library should be included, please ask first. 
 Do not change architecture without being asked.

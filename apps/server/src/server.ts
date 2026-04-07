@@ -6,6 +6,7 @@ import { seedDefaultCategories } from './services/categoryService';
 import transactionRoutes from './routes/transactions';
 import accountRoutes from './routes/accounts';
 import categoryRoutes from './routes/categories';
+import paycheckRoutes from './routes/paychecks';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -24,6 +25,7 @@ app.get('/health', (_req, res) => {
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/accounts', accountRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/paychecks', paycheckRoutes);
 
 app.use(errorHandler);
 

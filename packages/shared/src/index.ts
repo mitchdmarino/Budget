@@ -51,6 +51,38 @@ export interface UpdateCategoryInput {
   budget_cents?: number | null;
 }
 
+export interface Paycheck {
+  id: number;
+  gross_cents: number;
+  taxes_cents: number;
+  retirement_cents: number;
+  other_deductions_cents: number;
+  net_cents: number;
+  pay_date: string;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface CreatePaycheckInput {
+  gross_cents: number;
+  taxes_cents: number;
+  retirement_cents: number;
+  other_deductions_cents: number;
+  net_cents: number;
+  pay_date: string;
+  notes?: string | null;
+}
+
+export interface UpdatePaycheckInput {
+  gross_cents?: number;
+  taxes_cents?: number;
+  retirement_cents?: number;
+  other_deductions_cents?: number;
+  net_cents?: number;
+  pay_date?: string;
+  notes?: string | null;
+}
+
 export interface CreateAccountInput {
   name: string;
   type: 'checking' | 'savings' | 'credit' | 'retirement';
