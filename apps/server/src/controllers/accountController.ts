@@ -3,14 +3,16 @@ import { z } from 'zod';
 import * as accountService from '../services/accountService';
 import { AppError } from '../middleware/errorHandler';
 
+const ACCOUNT_TYPES = ['checking', 'savings', 'credit', 'retirement'] as const;
+
 const createSchema = z.object({
   name: z.string().min(1),
-  type: z.string().min(1),
+  type: z.enum(ACCOUNT_TYPES),
 });
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
-  type: z.string().min(1).optional(),
+  type: z.enum(ACCOUNT_TYPES).optional(),
 });
 
 export function getAccounts(_req: Request, res: Response, next: NextFunction): void {

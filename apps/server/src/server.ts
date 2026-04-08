@@ -2,15 +2,19 @@ import express from 'express';
 import path from 'path';
 import db from './db';
 import { migrate } from './migrate';
+import { seedDefaultCategories } from './services/categoryService';
 import transactionRoutes from './routes/transactions';
 import accountRoutes from './routes/accounts';
 import categoryRoutes from './routes/categories';
+import paycheckRoutes from './routes/paychecks';
+import summaryRoutes from './routes/summary';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
 
 migrate();
+seedDefaultCategories();
 
 app.use(express.json());
 
@@ -22,6 +26,8 @@ app.get('/health', (_req, res) => {
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/accounts', accountRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/paychecks', paycheckRoutes);
+app.use('/api/summary', summaryRoutes);
 
 app.use(errorHandler);
 

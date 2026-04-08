@@ -6,11 +6,13 @@ import { AppError } from '../middleware/errorHandler';
 const createSchema = z.object({
   name: z.string().min(1),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'color must be a valid hex string e.g. #ff5733'),
+  budget_cents: z.number().int().nullable().optional(),
 });
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'color must be a valid hex string e.g. #ff5733').optional(),
+  budget_cents: z.number().int().nullable().optional(),
 });
 
 export function getCategories(_req: Request, res: Response, next: NextFunction): void {
