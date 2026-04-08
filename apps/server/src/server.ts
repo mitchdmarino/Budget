@@ -7,6 +7,7 @@ import transactionRoutes from './routes/transactions';
 import accountRoutes from './routes/accounts';
 import categoryRoutes from './routes/categories';
 import paycheckRoutes from './routes/paychecks';
+import summaryRoutes from './routes/summary';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -26,6 +27,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/accounts', accountRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/paychecks', paycheckRoutes);
+app.use('/api/summary', summaryRoutes);
 
 app.use(errorHandler);
 
