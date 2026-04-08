@@ -306,15 +306,12 @@ export default function TransactionsPage() {
 
   const handleSave = async (data: CreateTransactionInput | UpdateTransactionInput) => {
     if (editing?.id) {
-      const updated = await transactionsApi.updateTransaction(editing.id, data as UpdateTransactionInput);
-      setTransactions(prev => prev.map(t => t.id === updated.id ? updated : t));
+      await transactionsApi.updateTransaction(editing.id, data as UpdateTransactionInput);
     } else {
-      const created = await transactionsApi.createTransaction(data as CreateTransactionInput);
-      if (created.date.startsWith(month)) {
-        setTransactions(prev => [created, ...prev]);
-      }
+      await transactionsApi.createTransaction(data as CreateTransactionInput);
     }
     setEditing(undefined);
+    load();
   };
 
   const handleDelete = async (id: number) => {
