@@ -6,6 +6,7 @@ const NAV = [
   { to: '/paychecks',   label: 'Paychecks'    },
   { to: '/accounts',    label: 'Accounts'      },
   { to: '/categories',  label: 'Categories'    },
+  { to: '/tags',        label: 'Tags'          },
 ];
 
 export default function Sidebar() {

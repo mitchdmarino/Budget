@@ -13,6 +13,7 @@ const createSchema = z.object({
   date: z.string(),
   description: z.string().min(1),
   category_id: z.number().int().nullable().optional(),
+  tag_id: z.number().int().nullable().optional(),
   account_id: z.number().int(),
 });
 
@@ -21,6 +22,7 @@ const updateSchema = z.object({
   date: z.string().optional(),
   description: z.string().min(1).optional(),
   category_id: z.number().int().nullable().optional(),
+  tag_id: z.number().int().nullable().optional(),
   account_id: z.number().int().optional(),
 });
 

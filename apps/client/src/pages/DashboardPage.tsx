@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { MonthlySummary, MonthlyHistoryPoint, CategorySpend } from '@budget/shared';
+import type { MonthlySummary, MonthlyHistoryPoint, CategorySpend, TagSpend } from '@budget/shared';
 import * as summaryApi from '../api/summary';
 import { formatCents } from '../utils/format';
 
@@ -133,6 +133,44 @@ function CategoryBar({ cat }: { cat: CategorySpend }) {
           <span className={over ? 'text-red-400' : 'text-gray-200'}>{formatCents(cat.spent_cents)}</span>
           {cat.budget_cents != null && (
             <span className="text-gray-600">/ {formatCents(cat.budget_cents)}</span>
+          )}
+        </div>
+      </div>
+      {pct != null && (
+        <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all"
+            style={{
+              width: `${pct}%`,
+              backgroundColor: over ? '#f87171' : color,
+            }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Tag Progress Bar ───────────────────────────────────────────────────────────
+
+function TagBar({ tag }: { tag: TagSpend }) {
+  const pct = tag.limit_cents && tag.limit_cents > 0
+    ? Math.min((tag.spent_cents / tag.limit_cents) * 100, 100)
+    : null;
+  const over = tag.limit_cents != null && tag.spent_cents > tag.limit_cents;
+  const color = tag.tag_color ?? '#6366f1';
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
+          <span className="text-sm text-gray-300">{tag.tag_name ?? 'Unknown'}</span>
+        </div>
+        <div className="flex items-center gap-3 text-xs font-mono">
+          <span className={over ? 'text-red-400' : 'text-gray-200'}>{formatCents(tag.spent_cents)}</span>
+          {tag.limit_cents != null && (
+            <span className="text-gray-600">/ {formatCents(tag.limit_cents)}</span>
           )}
         </div>
       </div>
@@ -318,6 +356,18 @@ export default function DashboardPage() {
               <div className="space-y-4">
                 {summary.by_category.map((cat, i) => (
                   <CategoryBar key={cat.category_id ?? `uncat-${i}`} cat={cat} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* By-tag breakdown */}
+          {summary.by_tag.length > 0 && (
+            <div className="bg-gray-900 border border-gray-800 rounded-xl px-5 py-4">
+              <h2 className="text-sm font-semibold text-gray-300 mb-4">Spending by Tag</h2>
+              <div className="space-y-4">
+                {summary.by_tag.map(tag => (
+                  <TagBar key={tag.tag_id} tag={tag} />
                 ))}
               </div>
             </div>

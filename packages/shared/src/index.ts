@@ -6,6 +6,7 @@ export interface Transaction {
   description: string;
   amount_cents: number;
   category_id: number | null;
+  tag_id: number | null;
   account_id: number;
   created_at: string;
 }
@@ -28,6 +29,7 @@ export interface CreateTransactionInput {
   date: string;
   description: string;
   category_id?: number | null;
+  tag_id?: number | null;
   account_id: number;
 }
 
@@ -36,6 +38,7 @@ export interface UpdateTransactionInput {
   date?: string;
   description?: string;
   category_id?: number | null;
+  tag_id?: number | null;
   account_id?: number;
 }
 
@@ -96,7 +99,35 @@ export interface UpsertBudgetGoalInput {
   savings_goal_cents: number;
 }
 
+export interface Tag {
+  id: number;
+  name: string;
+  color: string;
+  limit_cents: number | null;
+  created_at: string;
+}
+
+export interface CreateTagInput {
+  name: string;
+  color: string;
+  limit_cents?: number | null;
+}
+
+export interface UpdateTagInput {
+  name?: string;
+  color?: string;
+  limit_cents?: number | null;
+}
+
 // ── Summary types ──────────────────────────────────────────────────────────────
+
+export interface TagSpend {
+  tag_id: number | null;
+  tag_name: string | null;
+  tag_color: string | null;
+  limit_cents: number | null;
+  spent_cents: number;
+}
 
 export interface CategorySpend {
   category_id: number | null;
@@ -116,6 +147,7 @@ export interface MonthlySummary {
   paycheck_net_cents: number;
   paycheck_retirement_cents: number;
   by_category: CategorySpend[];
+  by_tag: TagSpend[];
 }
 
 export interface MonthlyHistoryPoint {
