@@ -30,13 +30,14 @@ export function createTransaction(input: CreateTransactionInput): Transaction {
   }
 
   const { lastInsertRowid } = db.prepare(`
-    INSERT INTO transactions (amount_cents, date, description, category_id, account_id)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO transactions (amount_cents, date, description, category_id, tag_id, account_id)
+    VALUES (?, ?, ?, ?, ?, ?)
   `).run(
     input.amount_cents,
     input.date,
     input.description,
     resolvedCategoryId,
+    input.tag_id ?? null,
     input.account_id,
   );
 
@@ -58,17 +59,19 @@ export function updateTransaction(id: number, input: UpdateTransactionInput): Tr
 
   const description = input.description ?? existing.description;
   const newCategoryId = 'category_id' in input ? (input.category_id ?? null) : existing.category_id;
+  const newTagId = 'tag_id' in input ? (input.tag_id ?? null) : existing.tag_id;
   const categoryChanged = newCategoryId !== existing.category_id;
 
   db.prepare(`
     UPDATE transactions
-    SET amount_cents = ?, date = ?, description = ?, category_id = ?, account_id = ?
+    SET amount_cents = ?, date = ?, description = ?, category_id = ?, tag_id = ?, account_id = ?
     WHERE id = ?
   `).run(
     input.amount_cents ?? existing.amount_cents,
     input.date ?? existing.date,
     description,
     newCategoryId,
+    newTagId,
     input.account_id ?? existing.account_id,
     id,
   );
@@ -101,7 +104,7 @@ export function importTransactions(
   accountId: number | null,
 ): { imported: number; skipped: number } {
   const insert = db.prepare(
-    'INSERT INTO transactions (account_id, category_id, description, amount_cents, date) VALUES (?, ?, ?, ?, ?)'
+    'INSERT INTO transactions (account_id, category_id, tag_id, description, amount_cents, date) VALUES (?, ?, ?, ?, ?, ?)'
   );
 
   const findCategory = db.prepare(
@@ -125,7 +128,7 @@ export function importTransactions(
       if (dup) { skipped++; continue; }
 
       const match = findCategory.get(row.description) as { category_id: number } | undefined;
-      insert.run(accountId, match?.category_id ?? null, row.description, row.amount_cents, row.posted_at);
+      insert.run(accountId, match?.category_id ?? null, null, row.description, row.amount_cents, row.posted_at);
       imported++;
     }
   })();

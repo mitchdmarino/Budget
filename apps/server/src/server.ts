@@ -8,6 +8,7 @@ import accountRoutes from './routes/accounts';
 import categoryRoutes from './routes/categories';
 import paycheckRoutes from './routes/paychecks';
 import summaryRoutes from './routes/summary';
+import tagRoutes from './routes/tags';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -28,6 +29,7 @@ app.use('/api/accounts', accountRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/paychecks', paycheckRoutes);
 app.use('/api/summary', summaryRoutes);
+app.use('/api/tags',    tagRoutes);
 
 app.use(errorHandler);
 

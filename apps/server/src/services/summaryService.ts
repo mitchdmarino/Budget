@@ -1,5 +1,5 @@
 import db from '../db';
-import type { MonthlySummary, MonthlyHistoryPoint, CategorySpend } from '@budget/shared';
+import type { MonthlySummary, MonthlyHistoryPoint, CategorySpend, TagSpend } from '@budget/shared';
 
 export function getMonthlySummary(month: string): MonthlySummary {
   // Income: sum of positive transaction amounts
@@ -30,6 +30,27 @@ export function getMonthlySummary(month: string): MonthlySummary {
   const goalRow = db.prepare(
     'SELECT savings_goal_cents FROM budget_goals WHERE month = ?'
   ).get(month) as { savings_goal_cents: number } | undefined;
+
+  // By-tag breakdown (expenses only, only tagged transactions)
+  const byTag = db.prepare(`
+    SELECT
+      t.tag_id,
+      tg.name  AS tag_name,
+      tg.color AS tag_color,
+      tg.limit_cents,
+      COALESCE(SUM(t.amount_cents), 0) AS spent_raw
+    FROM transactions t
+    LEFT JOIN tags tg ON tg.id = t.tag_id
+    WHERE strftime('%Y-%m', t.date) = ? AND t.amount_cents < 0 AND t.tag_id IS NOT NULL
+    GROUP BY t.tag_id
+    ORDER BY spent_raw ASC
+  `).all(month) as {
+    tag_id: number;
+    tag_name: string;
+    tag_color: string;
+    limit_cents: number | null;
+    spent_raw: number;
+  }[];
 
   // By-category breakdown (expenses only)
   const byCategory = db.prepare(`
@@ -65,6 +86,13 @@ export function getMonthlySummary(month: string): MonthlySummary {
     paycheck_gross_cents:      paycheckRow.gross,
     paycheck_net_cents:        paycheckRow.net,
     paycheck_retirement_cents: paycheckRow.retirement,
+    by_tag: byTag.map((row): TagSpend => ({
+      tag_id:    row.tag_id,
+      tag_name:  row.tag_name,
+      tag_color: row.tag_color,
+      limit_cents: row.limit_cents,
+      spent_cents: Math.abs(row.spent_raw),
+    })),
     by_category: byCategory.map((row): CategorySpend => ({
       category_id:    row.category_id,
       category_name:  row.category_name,

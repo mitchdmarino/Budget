@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import type { Transaction, Account, Category, CreateTransactionInput, UpdateTransactionInput } from '@budget/shared';
+import type { Transaction, Account, Category, Tag, CreateTransactionInput, UpdateTransactionInput } from '@budget/shared';
 import * as transactionsApi from '../api/transactions';
 import * as accountsApi from '../api/accounts';
 import * as categoriesApi from '../api/categories';
+import * as tagsApi from '../api/tags';
 import { formatCents } from '../utils/format';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -31,18 +32,21 @@ interface FormState {
   amount: string;
   account_id: string;
   category_id: string;
+  tag_id: string;
 }
 
 function TransactionModal({
   initial,
   accounts,
   categories,
+  tags,
   onSave,
   onClose,
 }: {
   initial?: Transaction;
   accounts: Account[];
   categories: Category[];
+  tags: Tag[];
   onSave: (data: CreateTransactionInput | UpdateTransactionInput) => Promise<void>;
   onClose: () => void;
 }) {
@@ -53,6 +57,7 @@ function TransactionModal({
     amount: initial ? String(Math.abs(initial.amount_cents) / 100) : '',
     account_id: initial?.account_id ? String(initial.account_id) : '',
     category_id: initial?.category_id ? String(initial.category_id) : '',
+    tag_id: initial?.tag_id ? String(initial.tag_id) : '',
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -74,6 +79,7 @@ function TransactionModal({
         amount_cents: Math.round(dollars * 100) * (form.type === 'expense' ? -1 : 1),
         account_id: form.account_id ? Number(form.account_id) : undefined,
         category_id: form.category_id ? Number(form.category_id) : null,
+        tag_id: form.tag_id ? Number(form.tag_id) : null,
       });
     } catch {
       setError('Failed to save transaction.');
@@ -161,6 +167,18 @@ function TransactionModal({
                 {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs text-gray-500 mb-1">Tag (optional)</label>
+            <select
+              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm"
+              value={form.tag_id}
+              onChange={e => set('tag_id', e.target.value)}
+            >
+              <option value="">No tag</option>
+              {tags.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+            </select>
           </div>
         </div>
 
@@ -276,6 +294,7 @@ export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [month, setMonth] = useState(currentMonth);
   const [search, setSearch] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -286,6 +305,7 @@ export default function TransactionsPage() {
   useEffect(() => {
     accountsApi.fetchAccounts().then(setAccounts).catch(() => {});
     categoriesApi.fetchCategories().then(setCategories).catch(() => {});
+    tagsApi.fetchTags().then(setTags).catch(() => {});
   }, []);
 
   const load = () => {
@@ -431,6 +451,7 @@ export default function TransactionsPage() {
           initial={editing ?? undefined}
           accounts={accounts}
           categories={categories}
+          tags={tags}
           onSave={handleSave}
           onClose={() => setEditing(undefined)}
         />
