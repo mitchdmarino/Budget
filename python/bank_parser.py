@@ -12,7 +12,7 @@ amount_cents:
 
 Supports:
   - US Bank credit card statements (Purchases/Credits sections)
-  - Generic bank statements (date + description + amount table rows)
+  - Capital One credit card statements (Trans Date / Post Date format)
 """
 
 import sys
@@ -53,6 +53,14 @@ def parse_date(date_str: str, year: str) -> str | None:
     return None
 
 
+def parse_cap1_date(month: str, day: str, year: str) -> str | None:
+    """Parse Capital One 'Mar 2'-style dates into YYYY-MM-DD."""
+    try:
+        return datetime.strptime(f"{month} {day} {year}", "%b %d %Y").strftime("%Y-%m-%d")
+    except ValueError:
+        return None
+
+
 def extract_year(text: str) -> str:
     """Find the first 4-digit year in the text (for statements without full dates)."""
     m = re.search(r"\b(20\d{2})\b", text)
@@ -79,8 +87,8 @@ def parse_usbank_cc(text: str) -> list[dict]:
 
     results = []
     for match in CC_PATTERN.findall(charges_text):
-        posted, _, desc, amount = match
-        date = parse_date(posted, year)
+        _post_date, trans_date, desc, amount = match
+        date = parse_date(trans_date, year)
         if date:
             results.append({
                 "posted_at": date,
@@ -89,8 +97,8 @@ def parse_usbank_cc(text: str) -> list[dict]:
             })
 
     for match in CC_PATTERN.findall(credits_text):
-        posted, _, desc, amount = match
-        date = parse_date(posted, year)
+        trans_date, _post_date, desc, amount = match
+        date = parse_date(trans_date, year)
         if date:
             results.append({
                 "posted_at": date,
@@ -101,25 +109,33 @@ def parse_usbank_cc(text: str) -> list[dict]:
     return results
 
 
-# ── Generic bank statement format ──────────────────────────────────────────────
-# Tries to find rows that look like: date  description  amount
-GENERIC_PATTERN = re.compile(
-    r"(\d{1,2}/\d{1,2}/\d{2,4}|\d{4}-\d{2}-\d{2})\s+(.+?)\s+(-?\$?[\d,]+\.\d{2})\s*$",
+# ── Capital One credit card format ─────────────────────────────────────────────
+# Line pattern: Mon D  Mon D  Description  $amount
+# e.g.  Mar 2  Mar 4  ALL ABOUT POKER RANCHO PALOS CA  $37.29
+CAP1_PATTERN = re.compile(
+    r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\s+"
+    r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{1,2})\s+"
+    r"(.+?)\s+\$([\d,]+\.\d{2})\s*$",
     re.MULTILINE,
 )
 
+CAP1_PAYMENT = re.compile(r"CAPITAL ONE AUTOPAY PYMT -", re.IGNORECASE)
 
-def parse_generic(text: str) -> list[dict]:
+
+def parse_capitalone_cc(text: str) -> list[dict]:
+    """Parse Capital One credit card statement (charges only)."""
+    year = extract_year(text)
     results = []
-    for match in GENERIC_PATTERN.findall(text):
-        date_str, desc, amount = match
-        date = parse_date(date_str, extract_year(text))
+    for match in CAP1_PATTERN.findall(text):
+        trans_month, trans_day, _post_month, _post_day, desc, amount = match
+        if CAP1_PAYMENT.search(desc):
+            continue
+        date = parse_cap1_date(trans_month, trans_day, year)
         if date:
-            cents = dollars_to_cents(amount)
             results.append({
                 "posted_at": date,
                 "description": desc.strip(),
-                "amount_cents": cents,
+                "amount_cents": -dollars_to_cents(amount),  # charges are expenses
             })
     return results
 
@@ -129,14 +145,19 @@ def parse_pdf(path: str) -> list[dict]:
         pages_text = [p.extract_text() or "" for p in pdf.pages]
     full_text = "\n".join(pages_text)
 
-    # Try US Bank CC format first
+    # Try US Bank CC format
     if "Purchases and Other Debits" in full_text or "Payments and Other Credits" in full_text:
         results = parse_usbank_cc(full_text)
         if results:
             return results
 
-    # Fall back to generic row parsing
-    return parse_generic(full_text)
+    # Try Capital One CC format
+    if "Trans Date" in full_text and "Post Date" in full_text:
+        results = parse_capitalone_cc(full_text)
+        if results:
+            return results
+
+    raise ValueError("Unrecognized statement format. Supported: US Bank CC, Capital One CC.")
 
 
 if __name__ == "__main__":
